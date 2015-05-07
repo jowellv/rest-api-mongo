@@ -21,6 +21,20 @@ describe('movie REST api', function(done) {
     });
   });
 
+  it('should creat movie ', function(done) {
+    chai.request('localhost:3000')
+      .post('/api/movies')
+      .send({name:'Shrek', genre:'comedy'})
+      .end(function(err, res) {
+        expect(err).to.eql(null);
+        expect(res.body.name).to.eql('Shrek');
+        expect(res.body.genre).to.eql('comedy');
+        expect(res.body).to.have.property('_id');
+        
+        done();
+      });
+  });
+
   it('should get an array of moviez', function(done) {
     chai.request('localhost:3000')
       .get('/api/movies')
