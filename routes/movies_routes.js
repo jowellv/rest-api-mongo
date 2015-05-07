@@ -16,4 +16,15 @@ module.exports = function(router) {
       res.json(data);
     });
   });
+
+  router.post('/movies', function(req, res) {
+    var newMovie = new Movie(req.body);
+    newMovie.save(function(err) {
+      if(err) {
+        console.log(err);
+        return res.json(500, 'internal server brain fart');
+      }
+      res.json(newMovie);
+    });
+  });
 };
