@@ -1,0 +1,24 @@
+{
+  "name": "rest-api-mongo",
+  "version": "0.1.0",
+  "description": "single resource rest api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jowellv/rest-api-mongo.git"
+  },
+  "author": "jowell.villasin@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jowellv/rest-api-mongo/issues"
+  },
+  "homepage": "https://github.com/jowellv/rest-api-mongo",
+  "dependencies": {
+    "body-parser": "^1.12.3",
+    "express": "^4.12.3",
+    "mongoose": "^4.0.2"
+  }
+}
