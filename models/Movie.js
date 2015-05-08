@@ -15,6 +15,6 @@ var Movie = mongoose.model('Movie', movieSchema);
 
 Movie.schema.path('genre').validate(function(value) {
   return /action|adventure|comedy|drama|horror|war/i.test(value);
-}, 'Invalid genre');
+}, 'not a valid genre');
 
 module.exports = Movie;
