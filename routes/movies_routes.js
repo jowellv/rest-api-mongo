@@ -21,6 +21,9 @@ module.exports = function(router) {
     var newMovie = new Movie(req.body);
     newMovie.save(function(err) {
       if(err) {
+        if(err.name === 'ValidationError' && err.errors.genre) {
+          return res.json({err:err.errors.genre.value + ' is ' + err.errors.genre.message + '.'});
+        }
         console.log(err);
         return res.status(500).json('internal server brain fart');
       }

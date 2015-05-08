@@ -21,6 +21,17 @@ describe('movie REST api', function() {
     });
   });
 
+  it('should not creat invalid movie ', function(done) {
+    chai.request('localhost:3000')
+      .post('/api/movies')
+      .send({name:'Shrek', genre:'funny'})
+      .end(function(err, res) {
+        expect(err).to.eql(null);
+        expect(res.body.err).to.eql('funny is not a valid genre.');
+        done();
+      });
+  });
+
   it('should creat movie ', function(done) {
     chai.request('localhost:3000')
       .post('/api/movies')
