@@ -13,7 +13,7 @@ var Movie = require('../models/Movie');
 
 
 
-describe('movie REST api', function(done) {
+describe('movie REST api', function() {
 
   after(function(done) {
     mongoose.connection.db.dropDatabase(function() {
@@ -29,8 +29,9 @@ describe('movie REST api', function(done) {
         expect(err).to.eql(null);
         expect(res.body.name).to.eql('Shrek');
         expect(res.body.genre).to.eql('comedy');
+        expect(res.body.desc).to.eql('No Description Given');
         expect(res.body).to.have.property('_id');
-        
+
         done();
       });
   });
@@ -46,5 +47,44 @@ describe('movie REST api', function(done) {
 
         done();
       });
+  });
+
+  describe('needs an existing movie to work on', function() {
+    beforeEach(function(done) {
+      var testMovie = new Movie({name: 'happy', genre:'comedy'});
+      testMovie.save(function(err, data) {
+        if(err) throw err;
+        this.testMovie = data;
+        done();
+      }.bind(this));
+    });
+
+    it('should actually create testMovie', function() {
+      expect(this.testMovie.name).to.eql('happy');
+      expect(this.testMovie).to.have.property('_id');
+    });
+
+    it('should update a movie', function(done) {
+      var id = this.testMovie._id;
+      chai.request('localhost:3000')
+        .put('/api/movies/' + id)
+        .send({name:'new name', genre:'action'})
+        .end(function(err, res) {
+           expect(err).to.eql(null);
+           expect(res.body.msg).to.eql('大成功！');
+           done();
+        });
+    });
+
+    it('should delete a movie', function(done) {
+      var id = this.testMovie._id;
+      chai.request('localhost:3000')
+        .del('/api/movies/' + id)
+        .end(function(err, res) {
+           expect(err).to.eql(null);
+           expect(res.body.msg).to.eql('大成功！');
+           done();
+        });
+    });
   });
 });
