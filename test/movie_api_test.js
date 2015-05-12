@@ -1,24 +1,27 @@
 'use strict';
 
-process.env.MONGOLAB_URI = 'mongodb://localhost/dev_db';
 require('../server');
 
-var mongoose = require('mongoose');
 var chai = require('chai');
 var chaihttp = require('chai-http');
 var expect = chai.expect;
 chai.use(chaihttp);
 var Movie = require('../models/Movie');
-
+var Sql = require('sequelize');
+var sql = new Sql('movies_dev', 'movies_dev', 'foobar123', {
+  dialect: 'postgres',
+  logging: false
+});
 
 
 
 describe('movie REST api', function() {
 
-  after(function(done) {
-    mongoose.connection.db.dropDatabase(function() {
-      done();
-    });
+  after(function() {
+    return Movie.drop({logging: false, cascade: true})
+        .then(function() {
+          return Movie.sync({logging: false});
+        });
   });
 
   it('should not creat invalid movie ', function(done) {
@@ -27,7 +30,7 @@ describe('movie REST api', function() {
       .send({name:'Shrek', genre:'funny'})
       .end(function(err, res) {
         expect(err).to.eql(null);
-        expect(res.body.err).to.eql('funny is not a valid genre.');
+        expect(res.body.err).to.eql('insert a valid genre');
         done();
       });
   });
@@ -41,7 +44,7 @@ describe('movie REST api', function() {
         expect(res.body.name).to.eql('Shrek');
         expect(res.body.genre).to.eql('comedy');
         expect(res.body.desc).to.eql('No Description Given');
-        expect(res.body).to.have.property('_id');
+        expect(res.body).to.have.property('id');
 
         done();
       });
@@ -62,40 +65,54 @@ describe('movie REST api', function() {
 
   describe('needs an existing movie to work on', function() {
     beforeEach(function(done) {
-      var testMovie = new Movie({name: 'happy', genre:'comedy'});
-      testMovie.save(function(err, data) {
-        if(err) throw err;
-        this.testMovie = data;
-        done();
-      }.bind(this));
-    });
-
-    it('should actually create testMovie', function() {
-      expect(this.testMovie.name).to.eql('happy');
-      expect(this.testMovie).to.have.property('_id');
+      chai.request('localhost:3000')
+        .post('/api/movies')
+        .send({name:'happy', genre:'comedy'})
+        .end(function(err, res) {
+          if(err) throw err;
+          done();
+        });
     });
 
     it('should update a movie', function(done) {
-      var id = this.testMovie._id;
-      chai.request('localhost:3000')
-        .put('/api/movies/' + id)
-        .send({name:'new name', genre:'action'})
-        .end(function(err, res) {
-           expect(err).to.eql(null);
-           expect(res.body.msg).to.eql('大成功！');
-           done();
+      var id;
+      sql.sync()
+      .then(function() {
+        Movie.find({ where: {name: 'happy'}})
+        .then(function(testMovie) {
+          id = testMovie.id;
+        })
+        .then(function() {
+          chai.request('localhost:3000')
+            .put('/api/movies/' + id)
+            .send({name:'new name', genre:'action'})
+            .end(function(err, res) {
+              expect(err).to.eql(null);
+              expect(res.body.msg).to.eql('大成功！');
+              done();
+            });
         });
+      });
     });
 
     it('should delete a movie', function(done) {
-      var id = this.testMovie._id;
-      chai.request('localhost:3000')
-        .del('/api/movies/' + id)
-        .end(function(err, res) {
-           expect(err).to.eql(null);
-           expect(res.body.msg).to.eql('大成功！');
-           done();
-        });
+      var id;
+      sql.sync()
+      .then(function() {
+        Movie.find({ where: {name: 'happy'}})
+        .then(function(testMovie) {
+          id = testMovie.id;
+        })
+        .then(function() {
+          chai.request('localhost:3000')
+            .del('/api/movies/' + id)
+            .end(function(err, res) {
+               expect(err).to.eql(null);
+               expect(res.body.msg).to.eql('大成功！');
+               done();
+            });
+          });
+      });
     });
   });
 });

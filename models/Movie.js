@@ -1,20 +1,19 @@
 'use strict';
 
-var mongoose = require('mongoose');
-
-var Schema = mongoose.Schema;
-
-var movieSchema = new Schema({
-  name  : String,
-  genre  : String,
-  desc  : {type: String, default: 'No Description Given'}
-
+var Sql = require('sequelize');
+var sql = new Sql('movies_dev', 'movies_dev', 'foobar123', {
+  dialect: 'postgres',
+  logging: false
 });
 
-var Movie = mongoose.model('Movie', movieSchema);
+var Movie = module.exports = sql.define('Movie', {
+  name: Sql.STRING,
+  genre: { type: Sql.STRING,
+    validate: {
+      isIn: [['action', 'adventure', 'comedy', 'drama', 'horror', 'war']]
+    }
+  },
+  desc: { type: Sql.STRING, defaultValue: 'No Description Given'}
+});
 
-Movie.schema.path('genre').validate(function(value) {
-  return /action|adventure|comedy|drama|horror|war/i.test(value);
-}, 'not a valid genre');
-
-module.exports = Movie;
+Movie.sync();

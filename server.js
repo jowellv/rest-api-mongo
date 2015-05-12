@@ -1,12 +1,9 @@
 'use strict';
 
-var mongoose = require('mongoose');
 var express = require('express');
 var app = express();
 
 var moviesRoutes = express.Router();
-
-mongoose.connect(process.env.MONGOLAB_URI ||'mongodb://localhost/dev_db');
 
 require('./routes/movies_routes')(moviesRoutes);
 

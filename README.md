@@ -1,9 +1,26 @@
-# REST API with MONGODB
+# REST API with ~~MONGODB~~ SEQUELIZE
 
-`GET` READ
+## LIST OF REQUESTS
 
-`PUSH` CREATE
+`GET` List of movies
 
-`PUT` EDIT
+`PUSH` with a JSON; Create a new movie
 
-`DELETE` DELETE
+`PUT /:id` Edit movie with id = :id
+
+`DELETE /:id` Delete a movie with id = :id
+
+Movie = {
+
+  name: String
+
+
+  genre: String (validates to list of accepted input: 
+
+  'action', 'adventure', 'comedy', 'drama', 'horror', 'war')
+
+
+  desc: String (defaults to No description given.)
+
+
+}
