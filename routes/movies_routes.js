@@ -1,8 +1,8 @@
 'use strict';
 
 var Movie = require('../models/Movie');
-
 var bodyparser = require('body-parser');
+var eatAuth = require('../lib/eat_auth')(process.env.APP_SECRET);
 
 module.exports = function(router) {
   router.use(bodyparser.json()); // req.body becomes a json object
@@ -17,7 +17,7 @@ module.exports = function(router) {
     });
   });
 
-  router.post('/movies', function(req, res) {
+  router.post('/movies', eatAuth, function(req, res) {
     var newMovie = new Movie(req.body);
     newMovie.save(function(err) {
       if(err) {
@@ -31,7 +31,7 @@ module.exports = function(router) {
     });
   });
 
-  router.put('/movies/:id', function(req, res) {
+  router.put('/movies/:id', eatAuth, function(req, res) {
      var updatedMovie = req.body;
      delete updatedMovie._id;
      Movie.findOneAndUpdate({'_id': req.params.id}, updatedMovie, function(err, data) { //_id is of type objectID
@@ -44,7 +44,7 @@ module.exports = function(router) {
      });
   });
 
-  router.delete('/movies/:id', function(req, res) {
+  router.delete('/movies/:id', eatAuth,  function(req, res) {
     Movie.findOneAndRemove({'_id': req.params.id}, function(err, data) { //_id is of type objectID
       if(err) {
         console.log(err);

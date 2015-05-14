@@ -38,7 +38,6 @@ module.exports = function (router, passport) {
 
 
   router.get('/sign_in', passport.authenticate('basic', {session: false}), function(req, res) {
-    console.log(req);
     req.user.generateToken(process.env.APP_SECRET, function(err, token) {
       if(err) {
         console.log(err);

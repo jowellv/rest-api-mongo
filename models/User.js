@@ -37,7 +37,10 @@ userSchema.methods.checkPassword = function(password, done) {
 };
 
 userSchema.methods.generateToken = function(secret, callback) {
-  eat.encode({id: this.uniqueHash}, secret, callback);
+  var today = new Date();
+  var expiresDate = new Date(today);
+  expiresDate.setDate(today.getDate() + 5); // tokens expire in 5 days
+  eat.encode({uniqueHash: this.uniqueHash, expires: expiresDate.getTime()}, secret, callback);
 };
 
 module.exports = mongoose.model('User', userSchema);

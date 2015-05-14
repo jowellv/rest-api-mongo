@@ -9,6 +9,7 @@ var chaihttp = require('chai-http');
 var expect = chai.expect;
 chai.use(chaihttp);
 var Movie = require('../models/Movie');
+var User = require('../models/User');
 
 
 
@@ -21,10 +22,21 @@ describe('movie REST api', function() {
     });
   });
 
+  before(function(done) {
+    var token;
+    chai.request('localhost:3000')
+      .post('/api/create_user')
+      .send({email:'test@example.com', password:'foobar123'})
+      .end(function(err, res) {
+        this.token = res.body.token;
+        done();
+      }.bind(this));
+  });
+
   it('should not creat invalid movie ', function(done) {
     chai.request('localhost:3000')
       .post('/api/movies')
-      .send({name:'Shrek', genre:'funny'})
+      .send({name:'Shrek', genre:'funny', eat:this.token})
       .end(function(err, res) {
         expect(err).to.eql(null);
         expect(res.body.err).to.eql('funny is not a valid genre.');
@@ -35,7 +47,7 @@ describe('movie REST api', function() {
   it('should creat movie ', function(done) {
     chai.request('localhost:3000')
       .post('/api/movies')
-      .send({name:'Shrek', genre:'comedy'})
+      .send({name:'Shrek', genre:'comedy', eat:this.token})
       .end(function(err, res) {
         expect(err).to.eql(null);
         expect(res.body.name).to.eql('Shrek');
@@ -62,7 +74,7 @@ describe('movie REST api', function() {
 
   describe('needs an existing movie to work on', function() {
     beforeEach(function(done) {
-      var testMovie = new Movie({name: 'happy', genre:'comedy'});
+      var testMovie = new Movie({name: 'happy', genre:'comedy', eat:this.token});
       testMovie.save(function(err, data) {
         if(err) throw err;
         this.testMovie = data;
@@ -79,7 +91,7 @@ describe('movie REST api', function() {
       var id = this.testMovie._id;
       chai.request('localhost:3000')
         .put('/api/movies/' + id)
-        .send({name:'new name', genre:'action'})
+        .send({name:'new name', genre:'action', eat:this.token})
         .end(function(err, res) {
            expect(err).to.eql(null);
            expect(res.body.msg).to.eql('大成功！');
@@ -91,6 +103,7 @@ describe('movie REST api', function() {
       var id = this.testMovie._id;
       chai.request('localhost:3000')
         .del('/api/movies/' + id)
+        .send({eat:this.token})
         .end(function(err, res) {
            expect(err).to.eql(null);
            expect(res.body.msg).to.eql('大成功！');
